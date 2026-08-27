@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+
+<!-- PWA / iOS home-screen -->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="JongCheon" />
+<meta name="theme-color" content="#f2f2f7" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<link rel="icon" type="image/png" href="icons/icon-192.png" />
+<link rel="manifest" href="manifest.json" />
+
+<title>JongCheon</title>
+
+<style>
+:root {
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --ink: #1c1c1e;
+  --ink-2: #8e8e93;
+  --line: #e5e5ea;
+  --accent: #007aff;
+  --accent-press: #0063cc;
+  --fill: #f2f2f7;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Segoe UI", "Noto Sans SC", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: var(--ink);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body { overflow: hidden; }
+
+.app {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  max-width: 520px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top) + 8px) 20px calc(env(safe-area-inset-bottom) + 12px);
+}
+
+/* ---------- header ---------- */
+.header { padding: 14px 4px 6px; }
+.header h1 {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+.header p {
+  margin: 6px 0 0;
+  font-size: 15px;
+  color: var(--ink-2);
+}
+
+/* ---------- scrollable body ---------- */
+.scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 6px 0 16px;
+}
+.scroll-body::-webkit-scrollbar { display: none; }
+
+.card {
+  background: var(--card);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+  margin-bottom: 16px;
+}
+
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  color: var(--ink-2);
+  text-transform: uppercase;
+  margin: 0 0 12px;
+}
+
+/* ---------- text input ---------- */
+.textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: none;
+  border: none;
+  outline: none;
+  background: var(--fill);
+  border-radius: 14px;
+  padding: 14px 16px;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+  -webkit-user-select: text;
+  user-select: text;
+}
+.textarea::placeholder { color: #c7c7cc; }
+.char-count {
+  text-align: right;
+  font-size: 12px;
+  color: #c7c7cc;
+  margin-top: 8px;
+}
+
+/* ---------- swatches ---------- */
+.swatch-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.swatch {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.10);
+  transition: transform 0.12s ease;
+}
+.swatch:active { transform: scale(0.9); }
+.swatch .glyph {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+.swatch.selected::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  border: 2.5px solid var(--accent);
+}
+.swatch .tick {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.swatch.selected .tick { display: flex; }
+
+/* ---------- segmented control ---------- */
+.segmented {
+  display: flex;
+  background: #e9e9eb;
+  border-radius: 11px;
+  padding: 3px;
+}
+.segmented button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+.segmented button.active {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  font-weight: 600;
+}
+.hint {
+  margin: 10px 2px 0;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+
+/* ---------- preview ---------- */
+.preview {
+  position: relative;
+  width: 100%;
+  height: 150px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+}
+.preview-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.preview-inner.scrolling { justify-content: flex-start; }
+.preview-text {
+  white-space: nowrap;
+  font-weight: 600;
+  will-change: transform;
+  line-height: 1.0;
+}
+.preview-tag {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  background: rgba(0,0,0,0.28);
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+}
+
+/* ---------- primary button ---------- */
+.primary {
+  width: 100%;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 16px;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease, opacity 0.2s ease;
+}
+.primary:active { transform: scale(0.98); background: var(--accent-press); }
+.primary:disabled { opacity: 0.35; cursor: default; }
+
+/* ---------- fullscreen display ---------- */
+.display {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2147483647;
+  display: none;
+  background: #000;
+}
+.display.active { display: block; }
+.display-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.display-inner.scrolling { justify-content: flex-start; }
+.danmaku-text {
+  white-space: nowrap;
+  font-weight: 600;
+  will-change: transform;
+  line-height: 1.0;
+}
+@keyframes danmaku-scroll {
+  from { transform: translateX(var(--from, 0px)); }
+  to   { transform: translateX(var(--to, -100px)); }
+}
+.danmaku-text.scrolling,
+.preview-text.scrolling {
+  animation: danmaku-scroll var(--dur, 6s) linear infinite;
+}
+
+.close-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 14px);
+  right: calc(env(safe-area-inset-right) + 14px);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(128,128,128,0.30);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.15s ease;
+}
+.close-btn:active { background: rgba(128,128,128,0.5); }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="header">
+    <h1>JongCheon</h1>
+  </div>
+
+  <div class="scroll-body">
+    <!-- 文字 -->
+    <div class="card">
+      <div class="label">文字内容</div>
+      <textarea id="textInput" class="textarea" maxlength="200" placeholder="输入要展示的文字，例如「弹幕」"></textarea>
+      <div class="char-count"><span id="charCount">0</span> / 200</div>
+    </div>
+
+    <!-- 字体颜色 -->
+    <div class="card">
+      <div class="label">字体颜色</div>
+      <div class="swatch-row" id="textColorRow">
+        <button class="swatch" data-color="#fffbef" aria-label="米白"><span class="glyph" style="color:#fffbef; text-shadow:0 0 1px rgba(0,0,0,0.3)">A</span><span class="tick">✓</span></button>
+        <button class="swatch" data-color="#c6e3ff" aria-label="浅蓝"><span class="glyph" style="color:#c6e3ff; text-shadow:0 0 1px rgba(0,0,0,0.3)">A</span><span class="tick">✓</span></button>
+        <button class="swatch" data-color="#fff2b2" aria-label="浅黄"><span class="glyph" style="color:#fff2b2; text-shadow:0 0 1px rgba(0,0,0,0.3)">A</span><span class="tick">✓</span></button>
+        <button class="swatch" data-color="#a52424" aria-label="深红"><span class="glyph" style="color:#a52424">A</span><span class="tick">✓</span></button>
+        <button class="swatch" data-color="#fff0e3" aria-label="浅米"><span class="glyph" style="color:#fff0e3; text-shadow:0 0 1px rgba(0,0,0,0.3)">A</span><span class="tick">✓</span></button>
+      </div>
+    </div>
+
+    <!-- 背景颜色 -->
+    <div class="card">
+      <div class="label">背景颜色</div>
+      <div class="swatch-row" id="bgColorRow">
+        <button class="swatch" data-color="#000000" aria-label="黑色背景" style="background:#000000"><span class="tick">✓</span></button>
+        <button class="swatch" data-color="#2e5aa7" aria-label="蓝色背景" style="background:#2e5aa7"><span class="tick">✓</span></button>
+        <button class="swatch" data-color="#7a4e26" aria-label="棕色背景" style="background:#7a4e26"><span class="tick">✓</span></button>
+        <button class="swatch" data-color="#a52424" aria-label="深红背景" style="background:#a52424"><span class="tick">✓</span></button>
+        <button class="swatch" data-color="#fffbef" aria-label="米白背景" style="background:#fffbef"><span class="tick">✓</span></button>
+      </div>
+    </div>
+
+    <!-- 滚动模式 -->
+    <div class="card">
+      <div class="label">滚动模式</div>
+      <div class="segmented" id="modeRow">
+        <button data-mode="auto" class="active">自动</button>
+        <button data-mode="static">静止</button>
+        <button data-mode="scroll">滚动</button>
+      </div>
+      <p class="hint" id="modeHint">字数少（如「弹幕」）直接静止放大；字数多会自动从右往左滚动，避免字太小。</p>
+
+      <div class="label" style="margin-top:18px;">滚动速度</div>
+      <div class="segmented" id="speedRow">
+        <button data-speed="1">慢</button>
+        <button data-speed="2" class="active">标准</button>
+        <button data-speed="3">快</button>
+        <button data-speed="4">极快</button>
+      </div>
+    </div>
+
+    <!-- 预览 -->
+    <div class="card">
+      <div class="label">预览</div>
+      <div class="preview" id="preview">
+        <div class="preview-inner" id="previewInner"><span class="preview-text" id="previewText"></span></div>
+        <div class="preview-tag" id="previewTag">静止</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="primary" id="showBtn" disabled>开始展示</button>
+</div>
+
+<!-- fullscreen display -->
+<div class="display" id="display">
+  <div class="display-inner" id="displayInner"><span class="danmaku-text" id="displayText"></span></div>
+  <button class="close-btn" id="closeBtn" aria-label="关闭">×</button>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- state ----------
+  var TEXT_COLORS = ["#fffbef", "#c6e3ff", "#fff2b2", "#a52424", "#fff0e3"];
+  var BG_COLORS = ["#000000", "#2e5aa7", "#7a4e26", "#a52424", "#fffbef"];
+  var SPEEDS = { 1: 50, 2: 100, 3: 160, 4: 240 }; // px/s
+
+  var state = {
+    text: "",
+    textColor: "#fffbef",
+    bgColor: "#000000",
+    mode: "auto", // auto | static | scroll
+    speed: 2      // 1 慢 / 2 标准 / 3 快 / 4 极快
+  };
+
+  // ---------- dom ----------
+  var textInput = document.getElementById("textInput");
+  var charCount = document.getElementById("charCount");
+  var showBtn = document.getElementById("showBtn");
+  var preview = document.getElementById("preview");
+  var previewInner = document.getElementById("previewInner");
+  var previewText = document.getElementById("previewText");
+  var previewTag = document.getElementById("previewTag");
+  var displayEl = document.getElementById("display");
+  var displayInner = document.getElementById("displayInner");
+  var displayText = document.getElementById("displayText");
+  var closeBtn = document.getElementById("closeBtn");
+  var modeHint = document.getElementById("modeHint");
+
+  var FONT = '-apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Segoe UI", "Noto Sans SC", sans-serif';
+  var measureCtx = document.createElement("canvas").getContext("2d");
+
+  function fontStr(px, weight) {
+    return (weight || 600) + " " + px + "px " + FONT;
+  }
+  function measure(text, px) {
+    measureCtx.font = fontStr(px);
+    return measureCtx.measureText(text).width;
+  }
+
+  // ---------- persistence ----------
+  function save() {
+    try { localStorage.setItem("danmu-state", JSON.stringify(state)); } catch (e) {}
+  }
+  function load() {
+    try {
+      var s = JSON.parse(localStorage.getItem("danmu-state"));
+      if (s) {
+        state.text = s.text || "";
+        state.textColor = TEXT_COLORS.indexOf(s.textColor) >= 0 ? s.textColor : "#fffbef";
+        state.bgColor = BG_COLORS.indexOf(s.bgColor) >= 0 ? s.bgColor : "#000000";
+        state.mode = (s.mode === "static" || s.mode === "scroll") ? s.mode : "auto";
+        state.speed = (s.speed === 1 || s.speed === 3 || s.speed === 4) ? s.speed : 2;
+      }
+    } catch (e) {}
+  }
+
+  // ---------- UI sync ----------
+  function syncUI() {
+    textInput.value = state.text;
+    charCount.textContent = (state.text || "").length;
+    showBtn.disabled = !(state.text || "").trim();
+
+    document.querySelectorAll("#textColorRow .swatch").forEach(function (b) {
+      b.classList.toggle("selected", b.dataset.color === state.textColor);
+    });
+    document.querySelectorAll("#bgColorRow .swatch").forEach(function (b) {
+      b.classList.toggle("selected", b.dataset.color === state.bgColor);
+    });
+    document.querySelectorAll("#modeRow button").forEach(function (b) {
+      b.classList.toggle("active", b.dataset.mode === state.mode);
+    });
+    document.querySelectorAll("#speedRow button").forEach(function (b) {
+      b.classList.toggle("active", Number(b.dataset.speed) === state.speed);
+    });
+
+    modeHint.textContent =
+      state.mode === "auto" ? "字数少直接静止放大，字数多自动滚动；含换行的文字会静止并完整展示。"
+      : state.mode === "static" ? "始终静止展示，文字会自动缩小以完整显示。"
+      : "始终滚动展示；含换行的文字会静止并完整展示。";
+
+    renderPreview();
+  }
+
+  // ---------- decide static vs scroll ----------
+  // 字号以「横屏短边」ch 为基准：静止时把整行文字撑满到屏宽 15/16（受满屏高上限），
+  // 字多放不下 0.5h 时切换为右→左滚动（滚动字号固定 0.75h）。
+  function decide(text, availW, ch) {
+    var STATIC_MAX = ch * 0.98;
+    if (state.mode === "scroll") return { type: "scroll" };
+    var fit = fitFont(text, availW, STATIC_MAX, 18);
+    if (state.mode === "static") return { type: "static", size: Math.min(fit, STATIC_MAX) };
+    // auto：字太多放不下 0.5h 就滚动，否则静止放大
+    if (fit >= ch * 0.5) return { type: "static", size: fit };
+    return { type: "scroll" };
+  }
+
+  function fitFont(text, maxW, maxFont, minFont) {
+    if (measure(text, maxFont) <= maxW) return maxFont;
+    var lo = minFont, hi = maxFont;
+    if (measure(text, lo) > maxW) return lo;
+    for (var i = 0; i < 22; i++) {
+      var mid = (lo + hi) / 2;
+      if (measure(text, mid) <= maxW) lo = mid; else hi = mid;
+    }
+    return lo;
+  }
+
+  function scrollFontSize(ch) {
+    return ch * 0.75;
+  }
+
+  // 多行静止：按行数与最宽行计算字号，让所有行尽可能大地完整显示
+  function multiLineFont(text, cwAvail, chAvail) {
+    var lines = text.split("\n").filter(function (l) { return l.trim().length > 0; });
+    if (!lines.length) lines = [""];
+    var n = lines.length;
+    var maxW = 0;
+    lines.forEach(function (l) { maxW = Math.max(maxW, measure(l, 100)); });
+    var byWidth = (cwAvail * 15 / 16) / (maxW / 100);
+    var byHeight = chAvail / (n * 1.25);
+    return Math.max(14, Math.min(byWidth, byHeight));
+  }
+
+  function renderInto(container, textEl, text, opts) {
+    var cw = container.clientWidth || 1;
+    var ch = container.clientHeight || 1;
+    var cs = getComputedStyle(container);
+    var padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    var padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var cwAvail = cw - padX;
+    var chAvail = ch - padY; // 扣除安全区（状态栏/刘海），避免文字被挡
+    var availW = cwAvail * 15 / 16;
+
+    textEl.style.color = opts.color;
+    if (textEl.__anim) { textEl.__anim.cancel(); textEl.__anim = null; }
+
+    // 多行：默认静止，尽可能大地完整展示
+    if (text.indexOf("\n") >= 0) {
+      textEl.textContent = text;
+      textEl.classList.remove("scrolling");
+      textEl.style.whiteSpace = "pre-line";
+      textEl.style.lineHeight = "1.25";
+      textEl.style.fontSize = multiLineFont(text, cwAvail, chAvail) + "px";
+      textEl.style.animation = "none";
+      textEl.style.transform = "none";
+      container.classList.remove("scrolling");
+      return "static";
+    }
+
+    // 单行
+    textEl.style.whiteSpace = "nowrap";
+    textEl.style.lineHeight = "1.0";
+    var res = decide(text, availW, chAvail);
+    if (res.type === "static") {
+      textEl.textContent = text;
+      textEl.classList.remove("scrolling");
+      textEl.style.fontSize = res.size + "px";
+      textEl.style.animation = "none";
+      textEl.style.transform = "none";
+      container.classList.remove("scrolling");
+      return "static";
+    } else {
+      // 滚动：文字重复 8 遍、每遍后 3 个空格，从屏幕右边进入、连续向左流动
+      var fs = scrollFontSize(chAvail);
+      textEl.style.fontSize = fs + "px";
+      var unit = text + "   ";
+      var unitW = measure(unit, fs);
+      var copies = 8;
+      textEl.textContent = new Array(copies + 1).join(unit);
+      var contentW = copies * unitW;
+      var speed = SPEEDS[state.speed] || 100;
+      var totalDist = cwAvail + contentW; // 从右进到完全离屏
+      var dur = totalDist / speed;
+      container.classList.add("scrolling");
+      textEl.classList.add("scrolling");
+      textEl.style.animation = "none";
+      textEl.style.transform = "none";
+      textEl.__anim = textEl.animate([
+        { transform: "translateX(" + cwAvail + "px)", offset: 0 },
+        { transform: "translateX(" + (-contentW) + "px)", offset: 1 }
+      ], { duration: dur * 1000, iterations: Infinity, easing: "linear" });
+      return "scroll";
+    }
+  }
+
+  function renderPreview() {
+    var text = (state.text || "").trim();
+    preview.style.background = state.bgColor;
+    if (!text) {
+      previewText.textContent = "";
+      previewInner.classList.remove("scrolling");
+      previewText.classList.remove("scrolling");
+      previewTag.textContent = "预览";
+      previewTag.style.color = "rgba(255,255,255,0.85)";
+      return;
+    }
+    var res = renderInto(previewInner, previewText, text, { color: state.textColor });
+    previewTag.textContent = res === "scroll" ? "滚动" : "静止";
+    // keep tag readable on light backgrounds
+    var isLight = state.bgColor === "#fffbef";
+    previewTag.style.color = isLight ? "rgba(0,0,0,0.6)" : "rgba(255,255,255,0.85)";
+    previewTag.style.background = isLight ? "rgba(255,255,255,0.45)" : "rgba(0,0,0,0.28)";
+  }
+
+  // ---------- fullscreen display ----------
+  // 把展示内容按「横屏」布局：视口竖屏时旋转 90°，横屏时正常铺满。
+  function orientDisplay() {
+    var w = window.innerWidth, h = window.innerHeight;
+    var inner = displayInner;
+    if (w < h) {
+      var cs = getComputedStyle(document.documentElement);
+      var sat = parseFloat(cs.getPropertyValue("--sat")) || 0; // 屏幕顶部（状态栏）
+      var sab = parseFloat(cs.getPropertyValue("--sab")) || 0; // 屏幕底部（home 指示条）
+      inner.style.left = "50%";
+      inner.style.top = "50%";
+      inner.style.right = "auto";
+      inner.style.bottom = "auto";
+      inner.style.width = h + "px";
+      inner.style.height = w + "px";
+      inner.style.marginLeft = (-h / 2) + "px";
+      inner.style.marginTop = (-w / 2) + "px";
+      inner.style.transform = "rotate(90deg)";
+      // 旋转 90° 后：元素左→屏幕顶、元素右→屏幕底；把顶部/底部安全区映射进来
+      inner.style.padding = "0 " + sab + "px 0 " + sat + "px";
+    } else {
+      inner.style.left = "";
+      inner.style.top = "";
+      inner.style.right = "";
+      inner.style.bottom = "";
+      inner.style.width = "";
+      inner.style.height = "";
+      inner.style.marginLeft = "";
+      inner.style.marginTop = "";
+      inner.style.transform = "";
+      inner.style.padding = "";
+    }
+  }
+
+  async function enterDisplay() {
+    var text = (state.text || "").trim();
+    if (!text) return;
+
+    displayEl.style.background = state.bgColor;
+    displayEl.classList.add("active");
+    displayInner.classList.remove("scrolling");
+    displayText.classList.remove("scrolling");
+    orientDisplay();
+    renderInto(displayInner, displayText, text, { color: state.textColor });
+
+    // 全屏：优先沉浸式（隐藏状态栏/导航栏），失败则逐级降级
+    var el = displayEl;
+    if (el.requestFullscreen) {
+      try { await el.requestFullscreen({ navigationUI: "hide" }); }
+      catch (e) { try { await el.requestFullscreen(); } catch (e2) {} }
+    } else if (document.documentElement.requestFullscreen) {
+      try { await document.documentElement.requestFullscreen({ navigationUI: "hide" }); }
+      catch (e) { try { await document.documentElement.requestFullscreen(); } catch (e2) {} }
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    }
+
+    // 锁定横屏（Android Chrome / 已安装 PWA）
+    try {
+      if (screen.orientation && screen.orientation.lock) {
+        await screen.orientation.lock("landscape");
+      }
+    } catch (e) {}
+
+    // 视口可能在锁横屏后才更新，用多帧 + 多时点重排，确保铺满、清除旋转残留
+    requestAnimationFrame(function () {
+      reflowDisplay();
+      requestAnimationFrame(reflowDisplay);
+    });
+    setTimeout(reflowDisplay, 120);
+    setTimeout(reflowDisplay, 300);
+    setTimeout(reflowDisplay, 700);
+  }
+
+  function exitDisplay() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(function () {});
+    } else if (document.webkitFullscreenElement) {
+      document.webkitExitFullscreen();
+    } else {
+      displayEl.classList.remove("active");
+      fixAppHeight();
+    }
+  }
+
+  document.addEventListener("fullscreenchange", function () {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      displayEl.classList.remove("active");
+      // 退出全屏后解锁横屏，并修复首页高度（防止按钮上移、底部空白）
+      try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+      setTimeout(fixAppHeight, 60);
+    } else {
+      setTimeout(reflowDisplay, 50);
+    }
+  });
+  document.addEventListener("webkitfullscreenchange", function () {
+    if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+      displayEl.classList.remove("active");
+      try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) {}
+      setTimeout(fixAppHeight, 60);
+    } else {
+      setTimeout(reflowDisplay, 50);
+    }
+  });
+
+  window.addEventListener("orientationchange", function () {
+    setTimeout(reflowDisplay, 150);
+    setTimeout(fixAppHeight, 100);
+    setTimeout(fixAppHeight, 300);
+  });
+  window.addEventListener("resize", function () {
+    fixAppHeight();
+    clearTimeout(window.__refit);
+    window.__refit = setTimeout(reflowDisplay, 120);
+  });
+
+  // 用 JS 固定首页高度，避免 fullscreen 退出后 100vh/dvh 残留导致按钮上移、底部空白
+  function fixAppHeight() {
+    var app = document.querySelector(".app");
+    if (app) app.style.height = window.innerHeight + "px";
+  }
+
+  function reflowDisplay() {
+    if (!displayEl.classList.contains("active")) return;
+    // 强制 .display 铺满当前视口（锁横屏后视口尺寸会变，避免右边露背景）
+    displayEl.style.width = window.innerWidth + "px";
+    displayEl.style.height = window.innerHeight + "px";
+    orientDisplay();
+    var text = (state.text || "").trim();
+    if (text) {
+      displayInner.classList.remove("scrolling");
+      displayText.classList.remove("scrolling");
+      renderInto(displayInner, displayText, text, { color: state.textColor });
+    }
+    renderPreview();
+  }
+
+  // ---------- events ----------
+  textInput.addEventListener("input", function () {
+    state.text = textInput.value;
+    charCount.textContent = state.text.length;
+    showBtn.disabled = !state.text.trim();
+    save();
+    renderPreview();
+  });
+
+  document.querySelectorAll("#textColorRow .swatch").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.textColor = b.dataset.color;
+      save(); syncUI();
+    });
+  });
+  document.querySelectorAll("#bgColorRow .swatch").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.bgColor = b.dataset.color;
+      save(); syncUI();
+    });
+  });
+  document.querySelectorAll("#modeRow button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.mode = b.dataset.mode;
+      save(); syncUI();
+    });
+  });
+  document.querySelectorAll("#speedRow button").forEach(function (b) {
+    b.addEventListener("click", function () {
+      state.speed = Number(b.dataset.speed);
+      save(); syncUI();
+    });
+  });
+
+  showBtn.addEventListener("click", enterDisplay);
+  closeBtn.addEventListener("click", exitDisplay);
+  displayEl.addEventListener("click", function (e) {
+    if (e.target === displayInner || e.target === displayText) {
+      // tap the background to exit (convenient on phone)
+      // exitDisplay();
+    }
+  });
+
+  // ---------- init ----------
+  load();
+  syncUI();
+  fixAppHeight();
+
+  // service worker (offline + Android install prompt)
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).catch(function () {});
+    });
+  }
+})();
+</script>
+</body>
+</html>
